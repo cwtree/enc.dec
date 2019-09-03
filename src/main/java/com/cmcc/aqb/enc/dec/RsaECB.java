@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.crypto.Cipher;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
@@ -36,12 +37,13 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  * @since JDK 1.6
  * @see
  */
-public class Rsa {
+public class RsaECB {
 
 	/**
 	 * 加密算法RSA
 	 */
 	public static final String KEY_ALGORITHM = "RSA";
+	public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";//RSA/ECB/PKCS1Padding
 
 	/**
 	 * 签名算法
@@ -224,7 +226,7 @@ public class Rsa {
 	 * @return 加密后的数据。
 	 */
 	public static byte[] encrypt(PublicKey publicKey, byte[] data) throws Exception {
-		Cipher ci = Cipher.getInstance(KEY_ALGORITHM);
+		Cipher ci = Cipher.getInstance(CIPHER_ALGORITHM);
 		ci.init(Cipher.ENCRYPT_MODE, publicKey);
 		return ci.doFinal(data);
 	}
@@ -239,7 +241,7 @@ public class Rsa {
 	 * @return 原数据。
 	 */
 	public static byte[] decrypt(PrivateKey privateKey, byte[] data) throws Exception {
-		Cipher ci = Cipher.getInstance(KEY_ALGORITHM);
+		Cipher ci = Cipher.getInstance(CIPHER_ALGORITHM);
 		ci.init(Cipher.DECRYPT_MODE, privateKey);
 		return ci.doFinal(data);
 	}
@@ -417,7 +419,17 @@ public class Rsa {
 		keyPair = genKeyPair();
 		RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
 		RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-
+		String modules = Hex.encodeHexString(publicKey.getModulus().toByteArray());
+		String publicExponent = Hex.encodeHexString(publicKey.getPublicExponent().toByteArray());
+		System.out.println("--------"+modules+"+++");
+		System.out.println("--------"+publicExponent+"+++");
+		Map<String, String> keyMap = new HashMap<String, String>(2);
+		keyMap.put(PUBLIC_KEY, Base64.encodeBase64String(publicKey.getEncoded()));
+		keyMap.put(PRIVATE_KEY, Base64.encodeBase64String(privateKey.getEncoded()));
+		System.out.println("++++++++++++++");
+		System.out.println(keyMap.get(PUBLIC_KEY));
+		System.out.println(keyMap.get(PRIVATE_KEY));
+		System.out.println("++++++++++++++");
 		String data = "123";
 		enBy = encrypt(publicKey, data.getBytes());
 		System.out.println(Base64.encodeBase64String(enBy));
